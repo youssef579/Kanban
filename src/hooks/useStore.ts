@@ -1,7 +1,11 @@
+// Zustand state management
 import { create } from "zustand";
 import { persist, devtools } from "zustand/middleware";
+// Utils
 import ACTIONS from "utils/actions";
 import type { Board, Column, Subtask, Task } from "types/documents";
+// Toaster
+import { toast } from "react-toastify";
 
 type DialogMode = "create" | "update" | null;
 
@@ -36,6 +40,13 @@ type Action =
               mode: DialogMode;
               for: keyof Pick<State, "boardDialogMode" | "taskDialogMode">;
           };
+      }
+    | {
+          type: ACTIONS.REORDER_TASKS;
+          payload: Record<
+              "from" | "to",
+              { index: number; droppableId: string }
+          >;
       };
 
 interface State {
@@ -72,6 +83,23 @@ function reducer(state: State, action: Action) {
                 id: state.currentBoard!.id,
             };
 
+            const updatedColumns = [
+                ...state.columns.filter(
+                    (col) => col.boardId !== updatedBoard.id
+                ),
+                ...action.payload.columns,
+            ];
+            const updatedColumnsIds = updatedColumns.map((col) => col.id);
+
+            const updatedTasks = state.tasks.filter((task) =>
+                updatedColumnsIds.includes(task.columnId)
+            );
+            const updatedTasksIds = updatedTasks.map((task) => task.id);
+
+            const updatedSubtasks = state.subtasks.filter((subtask) =>
+                updatedTasksIds.includes(subtask.taskId)
+            );
+
             return {
                 boards: state.boards.with(
                     state.boards.findIndex(
@@ -79,12 +107,9 @@ function reducer(state: State, action: Action) {
                     ),
                     updatedBoard
                 ),
-                columns: [
-                    ...state.columns.filter(
-                        (col) => col.boardId !== updatedBoard.id
-                    ),
-                    ...action.payload.columns,
-                ],
+                columns: updatedColumns,
+                tasks: updatedTasks,
+                subtasks: updatedSubtasks,
                 currentBoard: updatedBoard,
             };
         }
@@ -141,32 +166,92 @@ function reducer(state: State, action: Action) {
         }
 
         case ACTIONS.REORDER_COLUMNS: {
-            let currentColumns = state.columns.filter(
+            const currentColumns = state.columns.filter(
                 (col) => col.boardId === state.currentBoard!.id
             );
-
-            currentColumns = currentColumns.map((_, index) => {
-                if (
-                    (index > action.payload.to &&
-                        index > action.payload.from) ||
-                    (index < action.payload.to && index < action.payload.from)
-                )
-                    return currentColumns[index];
-                else if (index === action.payload.to)
-                    return currentColumns[action.payload.from];
-                else if (action.payload.from < action.payload.to)
-                    return currentColumns[index + 1];
-                else return currentColumns[index - 1];
-            });
 
             return {
                 columns: [
                     ...state.columns.filter(
                         (col) => col.boardId !== state.currentBoard!.id
                     ),
-                    ...currentColumns,
+                    ...currentColumns
+                        .toSpliced(action.payload.from, 1)
+                        .toSpliced(
+                            action.payload.to,
+                            0,
+                            currentColumns[action.payload.from]
+                        ),
                 ],
             };
+        }
+        case ACTIONS.REORDER_TASKS: {
+            if (
+                action.payload.from.droppableId ===
+                action.payload.to.droppableId
+            ) {
+                const currentTasks = state.tasks.filter(
+                    (task) => task.columnId === action.payload.from.droppableId
+                );
+
+                return {
+                    tasks: [
+                        ...state.tasks.filter(
+                            (task) =>
+                                task.columnId !==
+                                action.payload.from.droppableId
+                        ),
+                        ...currentTasks
+                            .toSpliced(action.payload.from.index, 1)
+                            .toSpliced(
+                                action.payload.to.index,
+                                0,
+                                currentTasks[action.payload.from.index]
+                            ),
+                    ],
+                };
+            } else {
+                const sourceTasks = state.tasks.filter(
+                    (task) => task.columnId === action.payload.from.droppableId
+                );
+
+                const destinationTasks = state.tasks.filter(
+                    (task) => task.columnId === action.payload.to.droppableId
+                );
+
+                for (const task of destinationTasks) {
+                    if (
+                        task.name.trim() ===
+                        sourceTasks[action.payload.from.index].name.trim()
+                    ) {
+                        toast.error(
+                            `There is already a task called "${task.name}" on the other column remove it to be able to drag it`,
+                            { containerId: "root" }
+                        );
+                        return {};
+                    }
+                }
+
+                return {
+                    tasks: [
+                        ...state.tasks.filter(
+                            (task) =>
+                                task.columnId !==
+                                    action.payload.from.droppableId &&
+                                task.columnId !== action.payload.to.droppableId
+                        ),
+                        ...sourceTasks.toSpliced(action.payload.from.index, 1),
+                        ...destinationTasks.toSpliced(
+                            action.payload.to.index,
+                            0,
+                            {
+                                ...sourceTasks[action.payload.from.index],
+                                columnId: action.payload.to.droppableId,
+                            }
+                        ),
+                    ],
+                };
+            }
         }
 
         case ACTIONS.TOGGLE_SIDE_BAR:

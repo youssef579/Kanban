@@ -2,6 +2,7 @@ import { Draggable, Droppable } from "@hello-pangea/dnd";
 import useStore from "hooks/useStore";
 import Task from "components/Task";
 import type { Column } from "types/documents";
+import clsx from "clsx";
 
 export default function Column({ col, index }: { col: Column; index: number }) {
     const tasks = useStore((state) => state.tasks);
@@ -30,35 +31,32 @@ export default function Column({ col, index }: { col: Column; index: number }) {
                         >
                             {col.name} ({currentTasks.length})
                         </p>
-                        {!currentTasks.length ? (
-                            <div className="grid w-[280px] flex-1 place-content-center rounded-lg border-2 border-dashed border-[rgba(130,143,163,.4)] text-3xl font-semibold text-alt-text">
-                                {" "}
-                                No Tasks
-                            </div>
-                        ) : (
-                            <Droppable
-                                droppableId={col.id}
-                                direction="vertical"
-                                type="task"
-                            >
-                                {(provided) => (
-                                    <div
-                                        {...provided.droppableProps}
-                                        ref={provided.innerRef}
-                                        className="w-[280px] flex-1 overflow-y-auto"
-                                    >
-                                        {currentTasks.map((task, index) => (
-                                            <Task
-                                                key={task.id}
-                                                task={task}
-                                                index={index}
-                                            />
-                                        ))}
-                                        {provided.placeholder}
-                                    </div>
-                                )}
-                            </Droppable>
-                        )}
+                        <Droppable
+                            droppableId={col.id}
+                            direction="vertical"
+                            type="task"
+                        >
+                            {(provided) => (
+                                <div
+                                    {...provided.droppableProps}
+                                    ref={provided.innerRef}
+                                    className={clsx(
+                                        "w-[280px] flex-1",
+                                        !currentTasks.length &&
+                                            "relative overflow-hidden rounded-lg border-2 border-dashed border-[rgba(130,143,163,.4)] before:absolute before:left-1/2 before:top-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:text-3xl before:font-semibold before:text-alt-text before:content-['No_Tasks']"
+                                    )}
+                                >
+                                    {currentTasks.map((task, index) => (
+                                        <Task
+                                            key={task.id}
+                                            task={task}
+                                            index={index}
+                                        />
+                                    ))}
+                                    {provided.placeholder}
+                                </div>
+                            )}
+                        </Droppable>
                     </div>
                 );
             }}

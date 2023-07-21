@@ -11,11 +11,11 @@ export default function Task({ task, index }: { task: Task; index: number }) {
     return (
         <Draggable draggableId={task.id} index={index}>
             {(provided) => (
-                <button
+                <div
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
                     ref={provided.innerRef}
-                    className="mb-5 w-full rounded-lg bg-secondary px-4 py-6 text-left shadow-lg"
+                    className="mb-5 w-[280px] rounded-lg bg-secondary px-4 py-6 text-left shadow-lg"
                 >
                     <p className="mb-2 font-semibold">{task.name}</p>
                     <p className="text-xs font-semibold text-alt-text">
@@ -26,7 +26,7 @@ export default function Task({ task, index }: { task: Task; index: number }) {
                         }{" "}
                         of {currentSubtasks.length} subtasks
                     </p>
-                </button>
+                </div>
             )}
         </Draggable>
     );

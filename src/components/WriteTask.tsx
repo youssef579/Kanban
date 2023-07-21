@@ -78,7 +78,7 @@ export default function WriteBoard() {
             (taskDialogMode === "create" || title !== currentTask!.name)
         ) {
             toastIds.current.push(
-                toast.error("The task name per column must be unique", {
+                toast.error("The task name must be unique for each column", {
                     containerId: "child",
                 })
             );

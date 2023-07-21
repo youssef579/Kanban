@@ -1,5 +1,5 @@
 // React dnd
-import { DragDropContext, Droppable } from "@hello-pangea/dnd";
+import { DragDropContext, type DropResult, Droppable } from "@hello-pangea/dnd";
 // State management
 import useStore from "hooks/useStore";
 import { shallow } from "zustand/shallow";
@@ -16,6 +16,37 @@ export default function ColumnList() {
     const currentColumns = columns.filter(
         (col) => col.boardId === currentBoard?.id
     );
+
+    function onDragEnd({ destination, source, type }: DropResult) {
+        if (
+            !destination ||
+            (destination.index === source.index &&
+                destination.droppableId === source.droppableId)
+        )
+            return;
+
+        switch (type) {
+            case "column":
+                dispatch({
+                    type: ACTIONS.REORDER_COLUMNS,
+                    payload: {
+                        from: source.index,
+                        to: destination.index,
+                    },
+                });
+                break;
+
+            case "task":
+                dispatch({
+                    type: ACTIONS.REORDER_TASKS,
+                    payload: {
+                        from: source,
+                        to: destination,
+                    },
+                });
+                break;
+        }
+    }
 
     if (!currentBoard)
         return (
@@ -38,31 +69,13 @@ export default function ColumnList() {
         );
 
     return (
-        <DragDropContext
-            onDragEnd={({ destination, source, type }) => {
-                if (
-                    !destination ||
-                    (destination.index === source.index &&
-                        destination.droppableId === source.droppableId)
-                )
-                    return;
-
-                if (type === "column")
-                    dispatch({
-                        type: ACTIONS.REORDER_COLUMNS,
-                        payload: {
-                            from: source.index,
-                            to: destination.index,
-                        },
-                    });
-            }}
-        >
+        <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId="board" direction="horizontal" type="column">
                 {(provided) => (
                     <section
                         {...provided.droppableProps}
                         ref={provided.innerRef}
-                        className="flex flex-1 overflow-x-auto py-6 pl-8"
+                        className="flex flex-1 overflow-auto py-6 pl-8"
                     >
                         {currentColumns.map((col, index) => (
                             <Column key={col.id} index={index} col={col} />
