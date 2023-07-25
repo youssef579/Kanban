@@ -21,9 +21,8 @@ import type { Board } from "types/documents";
 import { v4 as uuidv4 } from "uuid";
 
 export default function WriteBoard() {
-    const [boards, columns, dispatch, currentBoard, boardDialogMode] = useStore(
+    const [columns, dispatch, currentBoard, boardDialogMode] = useStore(
         (state) => [
-            state.boards,
             state.columns,
             state.dispatch,
             state.currentBoard,
@@ -66,33 +65,9 @@ export default function WriteBoard() {
             return;
         }
 
-        if (
-            boards!.find((board) => board.name === name.trim()) &&
-            (boardDialogMode === "create" || name !== currentBoard!.name)
-        ) {
-            toastIds.current.push(
-                toast.error("The board name must be unique", {
-                    containerId: "child",
-                })
-            );
-            return;
-        }
-
         if (boardColumns.some((column) => !column.name.trim())) {
             toastIds.current.push(
                 toast.error("Some columns are empty", { containerId: "child" })
-            );
-            return;
-        }
-
-        if (
-            boardColumns.length !==
-            new Set(boardColumns.map(({ name }) => name.trim())).size
-        ) {
-            toastIds.current.push(
-                toast.error("Each column must be unique", {
-                    containerId: "child",
-                })
             );
             return;
         }

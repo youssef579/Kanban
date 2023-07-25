@@ -40,8 +40,10 @@ export default function Header() {
                         key={board.id}
                         onClick={() => {
                             dispatch({
-                                type: ACTIONS.SET_CURRENT_BOARD,
-                                payload: { board },
+                                type: ACTIONS.SET_CURRENT,
+                                payload: {
+                                    currentBoard: board,
+                                },
                             });
                             boardsDialogRef.current!.close();
                         }}

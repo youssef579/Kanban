@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-refresh/only-export-components */
 // State
 import {
@@ -6,7 +7,7 @@ import {
     useState,
     forwardRef,
     useImperativeHandle,
-    type Ref,
+    useLayoutEffect,
 } from "react";
 import useStore from "hooks/useStore";
 import { shallow } from "zustand/shallow";
@@ -17,9 +18,12 @@ import Dialog from "components/Dialog";
 import clsx from "clsx";
 import type { Column } from "types/documents";
 
-export default forwardRef(function DropdownList(_, ref: Ref<Column>) {
-    const [columns, currentBoard] = useStore(
-        (state) => [state.columns, state.currentBoard],
+export default forwardRef<
+    Column,
+    { onChange?: (oldCol: Column, newCol: Column) => void }
+>(function DropdownList({ onChange }, ref) {
+    const [columns, currentBoard, currentTask] = useStore(
+        (state) => [state.columns, state.currentBoard, state.currentTask],
         shallow
     );
     const currentColumns = columns.filter(
@@ -36,7 +40,20 @@ export default forwardRef(function DropdownList(_, ref: Ref<Column>) {
         [isOpen]
     );
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useLayoutEffect(() => {
+        setCurrentColumn(
+            currentColumns.find(
+                (column) => column.id === currentTask?.columnId
+            ) ?? currentColumns[0]
+        );
+    }, [currentTask]);
+
+    useEffect(() => {
+        dialogRef
+            .current!.closest("dialog:not(.popup)")!
+            .addEventListener("close", () => setIsOpen(false));
+    }, []);
+
     useEffect(() => setCurrentColumn(currentColumns[0]), [currentBoard]);
 
     return (
@@ -62,13 +79,15 @@ export default forwardRef(function DropdownList(_, ref: Ref<Column>) {
                 popup
                 onClose={(e: React.SyntheticEvent) => e.stopPropagation()}
                 ref={dialogRef}
-                className="absolute z-50 w-full rounded bg-bg p-3"
+                className="popup fixed z-50 max-h-32 w-[min(432px,calc(100vw-38px-48px))] overflow-y-auto rounded bg-bg p-3"
             >
                 <div className="flex flex-col gap-2">
                     {currentColumns.map((col) => (
                         <button
                             onClick={() => {
                                 setIsOpen(false);
+                                if (currentColumn.id !== col.id)
+                                    onChange?.(currentColumn, col);
                                 setCurrentColumn(col);
                             }}
                             type="button"

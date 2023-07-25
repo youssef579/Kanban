@@ -26,7 +26,7 @@ export default forwardRef<HTMLDialogElement>(function DeleteBoard(_, ref) {
             <h1 className="mb-3 text-lg font-bold text-danger">
                 Delete this board?
             </h1>
-            <p className="text-sm text-alt-text">
+            <p className="text-sm font-medium text-alt-text">
                 Are you sure you want to delete the &quot;{currentBoard!.name}
                 &quot; board? This action will remove all columns and tasks and
                 cannot be reversed.

@@ -11,6 +11,7 @@ import ColumnList from "components/ColumnList";
 import Sidebar from "components/Sidebar";
 import WriteBoard from "components/WriteBoard";
 import WriteTask from "components/WriteTask";
+import TaskDetails from "components/TaskDetails";
 // Custom hooks
 import useStore from "hooks/useStore";
 // utils
@@ -48,6 +49,7 @@ export default function App() {
                     <ColumnList />
                     <WriteBoard />
                     <WriteTask />
+                    <TaskDetails />
                 </main>
             </ThemeProvider>
             <Toaster id="root" />

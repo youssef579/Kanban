@@ -22,12 +22,11 @@ import type { Column, Subtask } from "types/documents";
 import { v4 as uuidv4 } from "uuid";
 
 export default function WriteBoard() {
-    const [dispatch, taskDialogMode, subtasks, tasks, currentTask] = useStore(
+    const [dispatch, taskDialogMode, subtasks, currentTask] = useStore(
         (state) => [
             state.dispatch,
             state.taskDialogMode,
             state.subtasks,
-            state.tasks,
             state.currentTask,
         ],
         shallow
@@ -71,35 +70,9 @@ export default function WriteBoard() {
             return;
         }
 
-        if (
-            tasks!
-                .filter((task) => task.columnId === currentColumn.current!.id)
-                .find((task) => task.name === title.trim()) &&
-            (taskDialogMode === "create" || title !== currentTask!.name)
-        ) {
-            toastIds.current.push(
-                toast.error("The task name must be unique for each column", {
-                    containerId: "child",
-                })
-            );
-            return;
-        }
-
         if (currentSubtasks.some((task) => !task.name.trim())) {
             toastIds.current.push(
                 toast.error("Some subtasks are empty", { containerId: "child" })
-            );
-            return;
-        }
-
-        if (
-            currentSubtasks.length !==
-            new Set(currentSubtasks.map(({ name }) => name.trim())).size
-        ) {
-            toastIds.current.push(
-                toast.error("Each subtask must be unique", {
-                    containerId: "child",
-                })
             );
             return;
         }
@@ -187,6 +160,7 @@ export default function WriteBoard() {
                 <textarea
                     rows={4}
                     className="mb-4 block w-full resize-none rounded border-2 border-border bg-transparent p-2 text-sm caret-primary outline-none transition-colors focus:border-primary"
+                    onInput={(e) => setDescription(e.currentTarget.value)}
                 ></textarea>
                 <label className="mb-2 inline-block text-sm font-semibold">
                     State

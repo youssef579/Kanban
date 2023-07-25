@@ -47,8 +47,8 @@ export default function Sidebar() {
                             key={board.id}
                             onClick={() =>
                                 dispatch({
-                                    type: ACTIONS.SET_CURRENT_BOARD,
-                                    payload: { board },
+                                    type: ACTIONS.SET_CURRENT,
+                                    payload: { currentBoard: board },
                                 })
                             }
                             className={clsx(

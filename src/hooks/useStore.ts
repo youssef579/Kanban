@@ -4,8 +4,6 @@ import { persist, devtools } from "zustand/middleware";
 // Utils
 import ACTIONS from "utils/actions";
 import type { Board, Column, Subtask, Task } from "types/documents";
-// Toaster
-import { toast } from "react-toastify";
 
 type DialogMode = "create" | "update" | null;
 
@@ -32,8 +30,10 @@ type Action =
           payload: { from: number; to: number };
       }
     | { type: ACTIONS.TOGGLE_SIDE_BAR }
-    | { type: ACTIONS.SET_CURRENT_BOARD; payload: { board: Board } }
-    | { type: ACTIONS.SET_CURRENT_TASK; payload: { task: Task } }
+    | {
+          type: ACTIONS.SET_CURRENT;
+          payload: Pick<State, "currentBoard"> | Pick<State, "currentTask">;
+      }
     | {
           type: ACTIONS.SET_DIALOG_MODE;
           payload: {
@@ -47,7 +47,8 @@ type Action =
               "from" | "to",
               { index: number; droppableId: string }
           >;
-      };
+      }
+    | { type: ACTIONS.TOGGLE_SUBTASK; payload: { id: string } };
 
 interface State {
     subtasks: Subtask[];
@@ -219,19 +220,6 @@ function reducer(state: State, action: Action) {
                     (task) => task.columnId === action.payload.to.droppableId
                 );
 
-                for (const task of destinationTasks) {
-                    if (
-                        task.name.trim() ===
-                        sourceTasks[action.payload.from.index].name.trim()
-                    ) {
-                        toast.error(
-                            `There is already a task called "${task.name}" on the other column remove it to be able to drag it`,
-                            { containerId: "root" }
-                        );
-                        return {};
-                    }
-                }
-
                 return {
                     tasks: [
                         ...state.tasks.filter(
@@ -254,14 +242,23 @@ function reducer(state: State, action: Action) {
             }
         }
 
+        case ACTIONS.TOGGLE_SUBTASK: {
+            const subtask = state.subtasks.findIndex(
+                (subtask) => subtask.id === action.payload.id
+            );
+
+            return {
+                subtasks: state.subtasks.with(subtask, {
+                    ...state.subtasks[subtask],
+                    completed: !state.subtasks[subtask].completed,
+                }),
+            };
+        }
         case ACTIONS.TOGGLE_SIDE_BAR:
             return { hideSideBar: !state.hideSideBar };
 
-        case ACTIONS.SET_CURRENT_BOARD:
-            return { currentBoard: action.payload.board };
-
-        case ACTIONS.SET_CURRENT_TASK:
-            return { currentTask: action.payload.task };
+        case ACTIONS.SET_CURRENT:
+            return action.payload;
 
         case ACTIONS.SET_DIALOG_MODE:
             return {
@@ -289,7 +286,7 @@ export default create<State>()(
             }),
             {
                 name: "boards",
-                version: 13,
+                version: 15,
                 partialize(state) {
                     return Object.fromEntries(
                         Object.entries(state).filter(

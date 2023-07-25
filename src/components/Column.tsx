@@ -36,14 +36,15 @@ export default function Column({ col, index }: { col: Column; index: number }) {
                             direction="vertical"
                             type="task"
                         >
-                            {(provided) => (
+                            {(provided, snapshot) => (
                                 <div
                                     {...provided.droppableProps}
                                     ref={provided.innerRef}
                                     className={clsx(
-                                        "w-[280px] flex-1",
+                                        "relative w-[280px] flex-1 before:absolute before:inset-0 before:grid before:place-content-center before:rounded-lg before:border-2 before:border-dashed before:border-[rgba(130,143,163,.4)] before:text-3xl before:font-semibold before:text-alt-text before:opacity-0 before:transition-opacity before:content-['No_Tasks'] ",
                                         !currentTasks.length &&
-                                            "relative overflow-hidden rounded-lg border-2 border-dashed border-[rgba(130,143,163,.4)] before:absolute before:left-1/2 before:top-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:text-3xl before:font-semibold before:text-alt-text before:content-['No_Tasks']"
+                                            !snapshot.isDraggingOver &&
+                                            "before:opacity-100"
                                     )}
                                 >
                                     {currentTasks.map((task, index) => (

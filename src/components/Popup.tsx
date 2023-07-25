@@ -25,7 +25,7 @@ export default function Popup() {
             <Dialog
                 ref={popupRef}
                 popup
-                className="fixed right-8 top-20 mr-0 w-40 bg-bg p-4 font-semibold shadow-lg"
+                className="fixed right-8 top-20 z-50 mr-0 w-40 bg-bg p-4 font-semibold shadow-lg"
             >
                 <button
                     onClick={() => {
