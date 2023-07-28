@@ -4,7 +4,7 @@ import { type FormEvent, useState, useLayoutEffect, useRef } from "react";
 // React toastify
 import { toast } from "react-toastify";
 // Custom components
-import Dialog from "components/Dialog";
+import Dialog from "components/Dialogs/Dialog";
 import Toaster from "components/Toaster";
 // Custom hooks
 import useStore from "hooks/useStore";
@@ -38,7 +38,7 @@ export default function WriteBoard() {
     const toastIds = useRef<ReturnType<typeof toast>[]>([]);
 
     useLayoutEffect(() => {
-        if (!boardDialogMode) return;
+        if (!boardDialogMode || boardDialogMode === "delete") return;
 
         dialogRef.current!.showModal();
 
@@ -114,7 +114,7 @@ export default function WriteBoard() {
             onClose={() => {
                 dispatch({
                     type: ACTIONS.SET_DIALOG_MODE,
-                    payload: { mode: null, for: "boardDialogMode" },
+                    payload: { boardDialogMode: null },
                 });
 
                 for (const id of toastIds.current) toast.dismiss(id);

@@ -13,7 +13,7 @@ import useStore from "hooks/useStore";
 import { shallow } from "zustand/shallow";
 // MUI & Custom components
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import Dialog from "components/Dialog";
+import Dialog from "components/Dialogs/Dialog";
 // Utils
 import clsx from "clsx";
 import type { Column } from "types/documents";
@@ -50,7 +50,7 @@ export default forwardRef<
 
     useEffect(() => {
         dialogRef
-            .current!.closest("dialog:not(.popup)")!
+            .current!.closest("dialog:not(.dropdown)")!
             .addEventListener("close", () => setIsOpen(false));
     }, []);
 
@@ -79,7 +79,7 @@ export default forwardRef<
                 popup
                 onClose={(e: React.SyntheticEvent) => e.stopPropagation()}
                 ref={dialogRef}
-                className="popup fixed z-50 max-h-32 w-[min(432px,calc(100vw-38px-48px))] overflow-y-auto rounded bg-bg p-3"
+                className="dropdown fixed z-50 max-h-32 w-[min(432px,calc(100vw-38px-48px))] overflow-y-auto rounded bg-bg p-3"
             >
                 <div className="flex flex-col gap-2">
                     {currentColumns.map((col) => (

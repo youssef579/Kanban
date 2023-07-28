@@ -4,9 +4,9 @@ import { type FormEvent, useState, useLayoutEffect, useRef } from "react";
 // React toastify
 import { toast } from "react-toastify";
 // Custom components
-import Dialog from "components/Dialog";
+import Dialog from "components/Dialogs/Dialog";
 import Toaster from "components/Toaster";
-import DropdownList from "components/DropdownList";
+import DropdownList from "components/Dialogs/DropdownList";
 // Custom hooks
 import useStore from "hooks/useStore";
 import { shallow } from "zustand/shallow";
@@ -40,21 +40,29 @@ export default function WriteBoard() {
     const currentColumn = useRef<Column>(null);
     const toastIds = useRef<ReturnType<typeof toast>[]>([]);
 
+    console.log(taskDialogMode);
+
     useLayoutEffect(() => {
-        if (!taskDialogMode) return;
+        if (!taskDialogMode || taskDialogMode === "delete") return;
 
         dialogRef.current!.showModal();
 
-        if (taskDialogMode === "create") {
-            setTitle("");
-            setDescription("");
-            setCurrentSubtasks([{ name: "" }]);
-        } else {
-            setTitle(currentTask!.name);
-            setDescription(currentTask!.description);
-            setCurrentSubtasks(
-                subtasks.filter((subtask) => subtask.taskId === currentTask!.id)
-            );
+        switch (taskDialogMode) {
+            case "create":
+                setTitle("");
+                setDescription("");
+                setCurrentSubtasks([{ name: "" }]);
+                break;
+
+            case "update":
+                setTitle(currentTask!.name);
+                setDescription(currentTask!.description);
+                setCurrentSubtasks(
+                    subtasks.filter(
+                        (subtask) => subtask.taskId === currentTask!.id
+                    )
+                );
+                break;
         }
     }, [taskDialogMode]);
 
@@ -130,7 +138,7 @@ export default function WriteBoard() {
             onClose={() => {
                 dispatch({
                     type: ACTIONS.SET_DIALOG_MODE,
-                    payload: { mode: null, for: "taskDialogMode" },
+                    payload: { taskDialogMode: null },
                 });
 
                 for (const id of toastIds.current) toast.dismiss(id);
@@ -159,6 +167,7 @@ export default function WriteBoard() {
                 </label>
                 <textarea
                     rows={4}
+                    value={description}
                     className="mb-4 block w-full resize-none rounded border-2 border-border bg-transparent p-2 text-sm caret-primary outline-none transition-colors focus:border-primary"
                     onInput={(e) => setDescription(e.currentTarget.value)}
                 ></textarea>

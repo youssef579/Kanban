@@ -75,7 +75,7 @@ export default function Sidebar() {
                     onClick={() =>
                         dispatch({
                             type: ACTIONS.SET_DIALOG_MODE,
-                            payload: { mode: "create", for: "boardDialogMode" },
+                            payload: { boardDialogMode: "create" },
                         })
                     }
                     className="font-bold text-primary transition-opacity hover:opacity-80"

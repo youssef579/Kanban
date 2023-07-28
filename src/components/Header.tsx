@@ -4,8 +4,8 @@ import SpaceDashboardIcon from "@mui/icons-material/SpaceDashboard";
 import AddIcon from "@mui/icons-material/Add";
 import IconButton from "@mui/material/IconButton";
 // Custom components
-import Dialog from "components/Dialog";
-import Popup from "components/Popup";
+import Dialog from "components/Dialogs/Dialog";
+import Popup from "components/Dialogs/Popup";
 // Hooks & Utils
 import { useRef } from "react";
 import useStore from "hooks/useStore";
@@ -24,8 +24,7 @@ export default function Header() {
         dispatch({
             type: ACTIONS.SET_DIALOG_MODE,
             payload: {
-                mode: "create",
-                for: "taskDialogMode",
+                taskDialogMode: "create",
             },
         });
 
@@ -70,7 +69,7 @@ export default function Header() {
                     boardsDialogRef.current!.close();
                     dispatch({
                         type: ACTIONS.SET_DIALOG_MODE,
-                        payload: { mode: "create", for: "boardDialogMode" },
+                        payload: { boardDialogMode: "create" },
                     });
                 }}
                 className="font-bold text-primary transition-opacity hover:opacity-80"
@@ -123,7 +122,7 @@ export default function Header() {
                     >
                         <AddIcon />
                     </IconButton>
-                    <Popup />
+                    <Popup mode="board" />
                 </div>
             )}
         </header>

@@ -9,9 +9,10 @@ import Toaster from "components/Toaster";
 import Header from "components/Header";
 import ColumnList from "components/ColumnList";
 import Sidebar from "components/Sidebar";
-import WriteBoard from "components/WriteBoard";
-import WriteTask from "components/WriteTask";
-import TaskDetails from "components/TaskDetails";
+import WriteBoard from "components/Dialogs/WriteBoard";
+import WriteTask from "components/Dialogs/WriteTask";
+import TaskDetails from "components/Dialogs/TaskDetails";
+import DeleteDialog from "components/Dialogs/DeleteDialog";
 // Custom hooks
 import useStore from "hooks/useStore";
 // utils
@@ -50,6 +51,7 @@ export default function App() {
                     <WriteBoard />
                     <WriteTask />
                     <TaskDetails />
+                    <DeleteDialog />
                 </main>
             </ThemeProvider>
             <Toaster id="root" />

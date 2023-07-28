@@ -58,7 +58,7 @@ export default function ColumnList() {
                     onClick={() =>
                         dispatch({
                             type: ACTIONS.SET_DIALOG_MODE,
-                            payload: { mode: "create", for: "boardDialogMode" },
+                            payload: { boardDialogMode: "create" },
                         })
                     }
                     className="m-auto w-fit rounded-3xl bg-primary px-6 py-2.5 font-semibold shadow-md transition-all hover:opacity-80 hover:shadow-lg"

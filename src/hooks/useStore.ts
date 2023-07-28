@@ -5,7 +5,7 @@ import { persist, devtools } from "zustand/middleware";
 import ACTIONS from "utils/actions";
 import type { Board, Column, Subtask, Task } from "types/documents";
 
-type DialogMode = "create" | "update" | null;
+type DialogMode = "create" | "update" | "delete" | null;
 
 type Action =
     | {
@@ -16,7 +16,12 @@ type Action =
           type: ACTIONS.ADD_TASK;
           payload: { task: Task; subtasks: Subtask[] };
       }
-    | { type: ACTIONS.DELETE_BOARD }
+    | {
+          type:
+              | ACTIONS.DELETE_BOARD
+              | ACTIONS.DELETE_TASK
+              | ACTIONS.TOGGLE_SIDE_BAR;
+      }
     | {
           type: ACTIONS.UPDATE_BOARD;
           payload: Pick<Board, "name"> & { columns: Column[] };
@@ -29,17 +34,18 @@ type Action =
           type: ACTIONS.REORDER_COLUMNS;
           payload: { from: number; to: number };
       }
-    | { type: ACTIONS.TOGGLE_SIDE_BAR }
     | {
           type: ACTIONS.SET_CURRENT;
           payload: Pick<State, "currentBoard"> | Pick<State, "currentTask">;
       }
     | {
           type: ACTIONS.SET_DIALOG_MODE;
-          payload: {
-              mode: DialogMode;
-              for: keyof Pick<State, "boardDialogMode" | "taskDialogMode">;
-          };
+          payload: Partial<
+              Record<
+                  keyof Pick<State, "taskDialogMode" | "boardDialogMode">,
+                  DialogMode
+              >
+          >;
       }
     | {
           type: ACTIONS.REORDER_TASKS;
@@ -63,7 +69,7 @@ interface State {
     dispatch(action: Action): void;
 }
 
-function reducer(state: State, action: Action) {
+function reducer(state: State, action: Action): Partial<State> {
     switch (action.type) {
         case ACTIONS.ADD_BOARD:
             return {
@@ -124,7 +130,7 @@ function reducer(state: State, action: Action) {
             return {
                 tasks: state.tasks.with(
                     state.tasks.findIndex(
-                        (i) => i.id === state.currentTask!.id
+                        (task) => task.id === state.currentTask!.id
                     ),
                     updatedTask
                 ),
@@ -139,7 +145,9 @@ function reducer(state: State, action: Action) {
 
         case ACTIONS.DELETE_BOARD: {
             const remainingBoards = state.boards.toSpliced(
-                state.boards.findIndex((i) => i.id === state.currentBoard!.id),
+                state.boards.findIndex(
+                    (board) => board.id === state.currentBoard!.id
+                ),
                 1
             );
 
@@ -163,6 +171,23 @@ function reducer(state: State, action: Action) {
                 tasks: remainingTasks,
                 subtasks: remainingSubtasks,
                 currentBoard: remainingBoards[0] ?? null,
+            };
+        }
+
+        case ACTIONS.DELETE_TASK: {
+            const remainingTasks = state.tasks.toSpliced(
+                state.tasks.findIndex(
+                    (task) => task.id === state.currentTask!.id
+                ),
+                1
+            );
+
+            return {
+                tasks: remainingTasks,
+                subtasks: state.subtasks.filter(
+                    (subtask) => subtask.taskId !== state.currentTask!.id
+                ),
+                currentTask: null,
             };
         }
 
@@ -258,12 +283,8 @@ function reducer(state: State, action: Action) {
             return { hideSideBar: !state.hideSideBar };
 
         case ACTIONS.SET_CURRENT:
-            return action.payload;
-
         case ACTIONS.SET_DIALOG_MODE:
-            return {
-                [action.payload.for]: action.payload.mode,
-            };
+            return action.payload;
     }
 }
 

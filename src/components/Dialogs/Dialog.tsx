@@ -16,19 +16,14 @@ export default forwardRef<
         onClose?: (e: React.SyntheticEvent) => void;
     }
 >(function Dialog({ children, className, popup = false, onClose }, ref) {
-    const isRefObject = (
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ref: any
-    ): ref is React.RefObject<HTMLDialogElement> => {
-        return "current" in ref;
-    };
-
     return (
         <dialog
             onClose={onClose}
             onClick={(e) => {
-                if (isRefObject(ref) && e.currentTarget === e.target && !popup)
-                    ref.current!.close();
+                if (e.currentTarget === e.target && !popup)
+                    (
+                        ref as React.RefObject<HTMLDialogElement>
+                    ).current!.close();
             }}
             ref={ref}
             className={twMerge(
@@ -40,7 +35,9 @@ export default forwardRef<
                 <IconButton
                     aria-label="close"
                     onClick={() => {
-                        if (isRefObject(ref)) ref.current!.close();
+                        (
+                            ref as React.RefObject<HTMLDialogElement>
+                        ).current!.close();
                     }}
                     className="absolute right-5 top-5"
                 >

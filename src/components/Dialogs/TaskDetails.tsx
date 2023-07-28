@@ -1,17 +1,23 @@
-import Dialog from "components/Dialog";
+// React
 import { useLayoutEffect, useRef } from "react";
-import useStore from "hooks/useStore";
+// Utils
 import ACTIONS from "utils/actions";
+// State management
+import useStore from "hooks/useStore";
 import { shallow } from "zustand/shallow";
-import DropdownList from "./DropdownList";
+// Custom components
+import Dialog from "components/Dialogs/Dialog";
+import DropdownList from "components/Dialogs/DropdownList";
+import Popup from "components/Dialogs/Popup";
 
 export default function TaskDetails() {
-    const [subtasks, dispatch, currentTask, tasks] = useStore(
+    const [subtasks, dispatch, currentTask, tasks, taskDialogMode] = useStore(
         (state) => [
             state.subtasks,
             state.dispatch,
             state.currentTask,
             state.tasks,
+            state.taskDialogMode,
         ],
         shallow
     );
@@ -22,23 +28,25 @@ export default function TaskDetails() {
 
     useLayoutEffect(
         () =>
-            currentTask
+            currentTask && !taskDialogMode
                 ? dialogRef.current!.showModal()
                 : dialogRef.current!.close(),
-        [currentTask]
+        [currentTask, taskDialogMode]
     );
 
     return (
         <Dialog
             ref={dialogRef}
-            onClose={() =>
-                dispatch({
-                    type: ACTIONS.SET_CURRENT,
-                    payload: { currentTask: null },
-                })
-            }
+            onClose={() => {
+                if (!taskDialogMode)
+                    dispatch({
+                        type: ACTIONS.SET_CURRENT,
+                        payload: { currentTask: null },
+                    });
+            }}
         >
             <div className="flex flex-col gap-2">
+                <Popup mode="task" className="absolute right-16 top-5" />
                 <h1 className="text-lg font-bold">{currentTask?.name}</h1>
                 <p className="mb-3 text-[13px] font-medium text-alt-text">
                     {currentTask?.description || "No Description"}
