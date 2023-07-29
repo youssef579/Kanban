@@ -1,0 +1,22 @@
+{
+    "name": "Kanban: Task Manager",
+    "short_name": "Kanban",
+    "description": "Manage your goals and tasks from one place!",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#20212c",
+    "theme_color": "#635FC7",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
